@@ -1,11 +1,9 @@
 // Signifies that this file is apart of a bundled package
 package esepunittests
 
-// Definition of a new struct type each portion of the grade is represented as a slice of an array called Grade
+// Definition of a new struct type for all grades
 type GradeCalculator struct {
-	assignments []Grade
-	exams       []Grade
-	essays      []Grade
+	grades []Grade
 }
 
 // GradeType is defined to allow for each portion of the grade to be represented with ints
@@ -41,10 +39,8 @@ type Grade struct {
 func NewGradeCalculator() *GradeCalculator {
 	return &GradeCalculator{
 
-		// An empty slice is created for each assignment type
-		assignments: make([]Grade, 0),
-		exams:       make([]Grade, 0),
-		essays:      make([]Grade, 0),
+		// An empty list is created for all grades
+		grades: make([]Grade, 0),
 	}
 }
 
@@ -70,36 +66,21 @@ func (gc *GradeCalculator) GetFinalGrade() string {
 // Method to type GradeCalculator that adds a grade in
 func (gc *GradeCalculator) AddGrade(name string, grade int, gradeType GradeType) {
 
-	// Switch is used to select the correct branch to use based on gradeType
-	switch gradeType {
-	case Assignment:
-		gc.assignments = append(gc.assignments, Grade{
-			Name:  name,
-			Grade: grade,
-			Type:  Assignment,
-		})
-	case Exam:
-		gc.exams = append(gc.exams, Grade{
-			Name:  name,
-			Grade: grade,
-			Type:  Exam,
-		})
-	case Essay:
-		gc.essays = append(gc.essays, Grade{
-			Name:  name,
-			Grade: grade,
-			Type:  Essay,
-		})
-	}
+	// Grades are added to the list with the name, grade, and type
+	gc.grades = append(gc.grades, Grade{
+		Name:  name,
+		Grade: grade,
+		Type:  gradeType,
+	})
 }
 
 // Method to type GradeCalculator that calculates the total grade (0–100 as an int).
 func (gc *GradeCalculator) calculateNumericalGrade() int {
 
-	// Compute the average for assignments, exams, and essays by passing each slice into computeAverage.
-	assignment_average := computeAverage(gc.assignments)
-	exam_average := computeAverage(gc.exams)
-	essay_average := computeAverage(gc.essays)
+	// Compute the average for assignments, exams, and essays by passing each Type into computeAverage.
+	assignment_average := gc.computeAverage(Assignment)
+	exam_average := gc.computeAverage(Exam)
+	essay_average := gc.computeAverage(Essay)
 
 	// Grades are converted to floats and weights are applied to each one
 	weighted_grade := float64(assignment_average)*.5 + float64(exam_average)*.35 + float64(essay_average)*.15
@@ -108,26 +89,31 @@ func (gc *GradeCalculator) calculateNumericalGrade() int {
 	return int(weighted_grade)
 }
 
-func computeAverage(grades []Grade) int {
+func (gc *GradeCalculator) computeAverage(assignType GradeType) int {
 
-	// Get the amount of assignments in the slice
-	assignCount := len(grades)
+	// Variable declaration
+	sum := 0
+	assignCount := 0
+
+	// Loop through the grades
+	for _, grade := range gc.grades {
+
+		// Check if the type of the grade element matches the input type
+		if grade.Type == assignType {
+
+			// Add the Grade component of the current assignment to the summing variable
+			sum += grade.Grade
+
+			// Incrememnt the assignment counting variable
+			assignCount++
+		}
+	}
 
 	// Check if there are no assignments
 	if assignCount == 0 {
 
 		// If so, return 0
 		return 0
-	}
-
-	// Initialize the summing variable
-	sum := 0
-
-	// Loop through the grades and sum the value of the grade
-	for _, grade := range grades {
-
-		// Add the Grade component of the current assignment to the summing variable
-		sum += grade.Grade
 	}
 
 	// Return the average by dividing the sum by the number of assignments
